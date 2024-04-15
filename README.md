@@ -1,5 +1,7 @@
 # SillyTavern Fandom Scraper
 
+Server plugin to scrape Fandom wiki pages and export to JSON documents.
+
 ## How to install
 
 1. Before you begin, make sure you set a config `enableServerPlugins` to `true` in the config.yaml file of SillyTavern.
