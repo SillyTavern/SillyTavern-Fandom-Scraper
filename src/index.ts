@@ -10,6 +10,11 @@ interface Page {
     content: string;
 }
 
+interface FandomScrapeRequest{
+    fandom: string;
+    filter: string;
+}
+
 interface PluginInfo {
     id: string;
     name: string;
@@ -27,10 +32,17 @@ const MODULE_NAME = '[SillyTavern-Fandom-Scraper]';
 
 function getFandomId(fandom: string): string {
     try {
+        fandom = fandom.trim();
         const url = new URL(fandom);
         const hostname = url.hostname;
         const parts = hostname.split('.');
-        return parts[0];
+        const fandomId =  parts[0];
+
+        if (!fandomId) {
+            return fandom;
+        }
+
+        return fandomId;
     } catch (error) {
         return fandom;
     }
@@ -38,39 +50,44 @@ function getFandomId(fandom: string): string {
 
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
 
-async function scrapeFandom(fandom: string): Promise<Page[]> {
+async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
     const baseUrl = `https://${fandom}.fandom.com/`;
     let nextPageUrl = '/wiki/Special:AllPages';
     let counter = 0;
     const rawXml = [];
 
     while (nextPageUrl !== '') {
-        let listOfPages = '';
         const currentUrl = new URL(nextPageUrl, baseUrl);
         const fetchResponse = await fetch(currentUrl, { redirect: 'manual', headers: { 'User-Agent': USER_AGENT } });
         const fetchContent = await fetchResponse.text();
         const dom = new JSDOM(fetchContent);
         const content = dom.window.document.querySelector('.mw-allpages-body');
         const nextPage = dom.window.document.querySelector('.mw-allpages-nav');
+        const listOfPages = [];
 
         if (content) {
             const listOfEntries = content.querySelectorAll('li');
             for (const entry of listOfEntries) {
                 if (entry?.textContent) {
-                    listOfPages += entry.textContent.replace('(redirect', '') + '\n';
+                    const pageLink = entry.textContent.replace('(redirect', '') + '\n';
+                    // RegExp are stateful, so we need to clone it
+                    if (filter && !new RegExp(filter).test(pageLink)) {
+                        continue;
+                    }
+                    listOfPages.push(pageLink);
                 }
             }
         }
 
         const payload = new URLSearchParams();
         payload.append('catname', '');
-        payload.append('pages', listOfPages);
+        payload.append('pages', listOfPages.join('\n'));
         payload.append('curonly', '1');
         payload.append('wpDownload', '1');
         payload.append('wpEditToken', '+\\');
         payload.append('title', 'Special:Export');
 
-        console.log(chalk.green(MODULE_NAME), `Scraping ${currentUrl}`);
+        console.log(chalk.green(MODULE_NAME), `Exporting from ${currentUrl}`);
         const response = await fetch(`https://${fandom}.fandom.com/wiki/Special:Export`, {
             method: 'POST',
             body: payload,
@@ -105,8 +122,23 @@ async function scrapeFandom(fandom: string): Promise<Page[]> {
 }
 
 function wikiToText(wiki: string): string {
+    // Parse wiki text to plain text
     const parser = new wt2pt.default();
-    return parser.parse(wiki);
+    let rawContent =  parser.parse(wiki);
+
+    // Remove extra spaces between brackets
+    rawContent = rawContent.replace(/\(\s+/g, '(');
+    // Remove empty brackets, non-breaking spaces and spaces before commas
+    rawContent = rawContent.replace('()', '').replace('\u00a0', ' ').replace(' , ', ', ');
+    // Decode HTML entities
+    rawContent = he.decode(rawContent);
+
+    // Remove lines starting with 'Category:'
+    rawContent = rawContent.split('\n').filter(line => !line.startsWith('Category:')).join('\n');
+    // Remove HTML tags (leave only text)
+    rawContent = rawContent.replace(/<[^>]*>/g, '');
+
+    return rawContent;
 }
 
 function getPagesFromXml(xml: string): Page[] {
@@ -132,9 +164,6 @@ function getPagesFromXml(xml: string): Page[] {
         const content = page.querySelector('text');
         if (content?.textContent) {
             let rawContent = wikiToText(content.textContent);
-            rawContent = rawContent.replace(/\(\s+/g, '(');
-            rawContent = rawContent.replace('()', '').replace('\u00a0', ' ').replace(' , ', ', ');
-            rawContent = he.decode(rawContent);
 
             contentText = rawContent;
         }
@@ -144,6 +173,34 @@ function getPagesFromXml(xml: string): Page[] {
     }
 
     return result;
+}
+
+/**
+ * Instantiates a regular expression from a string.
+ * @param {string} input The input string.
+ * @returns {RegExp} The regular expression instance.
+ * @copyright Originally from: https://github.com/IonicaBizau/regex-parser.js/blob/master/lib/index.js
+ */
+function regexFromString(input: string): RegExp | undefined {
+    try {
+        // Parse input
+        const match = input?.match(/(\/?)(.+)\1([a-z]*)/i);
+
+        if (!match) {
+            return;
+        }
+
+        // Invalid flags
+        if (match[3] && !/^(?!.*?(.).*?\1)[gmixXsuUAJ]+$/.test(match[3])) {
+            const defaultFlags = 'i';
+            return RegExp(input, defaultFlags);
+        }
+
+        // Create the regular expression
+        return new RegExp(match[2], match[3]);
+    } catch {
+        return;
+    }
 }
 
 /**
@@ -157,7 +214,12 @@ export async function init(router: Router): Promise<void> {
     });
     router.post('/scrape', jsonParser, async (req, res) => {
         try {
-            const result = await scrapeFandom(getFandomId(req.body.fandom));
+            const model = req.body as FandomScrapeRequest;
+            const fandomId = getFandomId(model.fandom);
+            const filter = regexFromString(model.filter);
+            console.log(chalk.green(MODULE_NAME), `Scraping ${fandomId} with filter: ${filter ? filter.source : 'none'}`);
+            const result = await scrapeFandom(fandomId, filter);
+            console.log(chalk.green(MODULE_NAME), `Successfully scraped ${result.length} pages from ${fandomId}!`);
             return res.json(result);
         } catch (error) {
             console.error(chalk.red(MODULE_NAME), 'Scrape failed', error);
