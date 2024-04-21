@@ -13,6 +13,8 @@ cd plugins
 git clone https://github.com/Cohee1207/SillyTavern-Fandom-Scraper
 ```
 
+3. Restart the SillyTavern server.
+
 ## How to build
 
 Clone the repository, then run `npm install`.
