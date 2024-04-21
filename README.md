@@ -13,8 +13,6 @@ cd plugins
 git clone https://github.com/Cohee1207/SillyTavern-Fandom-Scraper
 ```
 
-3. Restart the SillyTavern server. Then choose "Selenium Plugin" as a source in the Web Search extension UI.
-
 ## How to build
 
 Clone the repository, then run `npm install`.
