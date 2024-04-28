@@ -12,14 +12,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Cohee1207/SillyTavern-Fandom-Scraper.git"
+        "url": "git+https://github.com/SillyTavern/SillyTavern-Fandom-Scraper.git"
     },
     "author": "Cohee1207",
     "license": "AGPL-3.0-or-later",
     "bugs": {
-        "url": "https://github.com/Cohee1207/SillyTavern-Fandom-Scraper/issues"
+        "url": "https://github.com/SillyTavern/SillyTavern-Fandom-Scraper/issues"
     },
-    "homepage": "https://github.com/Cohee1207/SillyTavern-Fandom-Scraper#readme",
+    "homepage": "https://github.com/SillyTavern/SillyTavern-Fandom-Scraper#readme",
     "devDependencies": {
         "@eslint/js": "^9.0.0",
         "@types/express": "^4.17.21",

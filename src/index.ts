@@ -10,7 +10,7 @@ interface Page {
     content: string;
 }
 
-interface FandomScrapeRequest{
+interface FandomScrapeRequest {
     fandom: string;
     filter: string;
 }
@@ -36,7 +36,7 @@ function getFandomId(fandom: string): string {
         const url = new URL(fandom);
         const hostname = url.hostname;
         const parts = hostname.split('.');
-        const fandomId =  parts[0];
+        const fandomId = parts[0];
 
         if (!fandomId) {
             return fandom;
@@ -53,7 +53,6 @@ const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
 async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
     const baseUrl = `https://${fandom}.fandom.com/`;
     let nextPageUrl = '/wiki/Special:AllPages';
-    let counter = 0;
     const rawXml = [];
 
     while (nextPageUrl !== '') {
@@ -97,8 +96,6 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
         const data = await response.text();
         rawXml.push(data);
 
-        counter += 1;
-
         if (nextPage) {
             const nav = nextPage.querySelectorAll('a');
             if (nav.length > 0) {
@@ -124,7 +121,7 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
 function wikiToText(wiki: string): string {
     // Parse wiki text to plain text
     const parser = new wt2pt.default();
-    let rawContent =  parser.parse(wiki);
+    let rawContent = parser.parse(wiki);
 
     // Remove extra spaces between brackets
     rawContent = rawContent.replace(/\(\s+/g, '(');
@@ -163,7 +160,7 @@ function getPagesFromXml(xml: string): Page[] {
         }
         const content = page.querySelector('text');
         if (content?.textContent) {
-            let rawContent = wikiToText(content.textContent);
+            const rawContent = wikiToText(content.textContent);
 
             contentText = rawContent;
         }
