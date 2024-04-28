@@ -10,7 +10,7 @@ Server plugin to scrape Fandom wiki pages and export to JSON documents.
 
 ```bash
 cd plugins
-git clone https://github.com/Cohee1207/SillyTavern-Fandom-Scraper
+git clone https://github.com/SillyTavern/SillyTavern-Fandom-Scraper
 ```
 
 3. Restart the SillyTavern server.
