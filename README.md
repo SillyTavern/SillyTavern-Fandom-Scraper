@@ -1,6 +1,6 @@
-# SillyTavern Fandom Scraper
+# SillyTavern Fandom/MediaWiki Scraper
 
-Server plugin to scrape Fandom wiki pages and export to JSON documents.
+Server plugin to scrape Fandom and MediaWiki wiki pages and export to JSON documents.
 
 ## How to install
 

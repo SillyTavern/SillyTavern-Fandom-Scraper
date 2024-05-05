@@ -1,7 +1,7 @@
 {
     "name": "sillytavern-fandom-scraper",
     "version": "1.0.0",
-    "description": "Scrape Fandom wiki pages and export to JSON documents.",
+    "description": "Scrape Fandom/MediaWiki wiki pages and export to JSON documents.",
     "main": "dist/plugin.js",
     "type": "commonjs",
     "scripts": {
