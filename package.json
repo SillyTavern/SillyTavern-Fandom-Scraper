@@ -31,11 +31,11 @@
         "ts-loader": "^9.5.1",
         "typescript": "^5.4.5",
         "typescript-eslint": "^7.6.0",
-        "webpack": "^5.91.0",
+        "webpack": "^5.99.9",
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
-        "body-parser": "^1.20.2",
+        "body-parser": "^1.20.3",
         "chalk": "^5.3.0",
         "he": "^1.2.0",
         "jsdom": "^24.0.0",
