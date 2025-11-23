@@ -10,9 +10,6 @@
         "lint": "eslint .",
         "lint:fix": "eslint --fix ."
     },
-    "overrides": {
-        "punycode": "punycode2"
-    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/SillyTavern/SillyTavern-Fandom-Scraper.git"
@@ -43,7 +40,7 @@
         "chalk": "^5.3.0",
         "he": "^1.2.0",
         "jsdom": "^24.0.0",
-        "punycode2": "^1.0.1",
+        "punycode": "^2.3.1",
         "utf-8-validate": "^6.0.5",
         "wikitext2plaintext": "^0.1.0"
     }

@@ -39,8 +39,8 @@ const serverConfig = {
     externals: [
         {
             punycode: {
-                commonjs: 'punycode2',
-                commonjs2: 'punycode2',
+                commonjs: 'punycode/',
+                commonjs2: 'punycode/',
             },
         },
     ],
