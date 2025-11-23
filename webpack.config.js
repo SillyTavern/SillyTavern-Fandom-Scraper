@@ -14,6 +14,9 @@ const serverConfig = {
     },
     resolve: {
         extensions: ['.ts', '.js'],
+        alias: {
+            punycode: 'punycode2',
+        },
     },
     module: {
         rules: [
@@ -36,6 +39,14 @@ const serverConfig = {
             }),
         ],
     },
+    externals: [
+        {
+            punycode: {
+                commonjs: 'punycode2',
+                commonjs2: 'punycode2',
+            },
+        },
+    ],
     plugins: [
         new webpack.IgnorePlugin({
             resourceRegExp: /canvas/,
