@@ -14,9 +14,6 @@ const serverConfig = {
     },
     resolve: {
         extensions: ['.ts', '.js'],
-        alias: {
-            punycode: 'punycode2',
-        },
     },
     module: {
         rules: [
