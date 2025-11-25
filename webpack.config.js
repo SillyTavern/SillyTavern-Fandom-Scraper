@@ -36,6 +36,14 @@ const serverConfig = {
             }),
         ],
     },
+    externals: [
+        {
+            punycode: {
+                commonjs: 'punycode/',
+                commonjs2: 'punycode/',
+            },
+        },
+    ],
     plugins: [
         new webpack.IgnorePlugin({
             resourceRegExp: /canvas/,
