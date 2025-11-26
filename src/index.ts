@@ -104,7 +104,7 @@ async function scrapeMediaWiki(url: string, filter?: RegExp): Promise<Page[]> {
         });
 
         const data = await response.text();
-        
+
         // Process XML immediately to free up memory
         const chunkPages = getPagesFromXml(data);
         accumulatedPages.push(...chunkPages);
@@ -158,7 +158,7 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
                 }
             }
         }
-        
+
         // Clean up navigation DOM immediately
         dom.window.close();
 
@@ -178,7 +178,7 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
         });
 
         const data = await response.text();
-        
+
         // Process XML immediately to free up memory
         const chunkPages = getPagesFromXml(data);
         accumulatedPages.push(...chunkPages);
@@ -255,7 +255,7 @@ function getPagesFromXml(xml: string): Page[] {
             result.push({ title: titleText, content: contentText });
         }
     }
-    
+
     // Explicitly close the JSDOM window to release memory
     dom.window.close();
 
