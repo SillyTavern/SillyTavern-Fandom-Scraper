@@ -60,7 +60,7 @@ function trimTrailingSlash(url: string): string {
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
 
 async function scrapeMediaWiki(url: string, filter?: RegExp): Promise<Page[]> {
-    const rawXml = [];
+    const accumulatedPages: Page[] = [];
     let nextPageUrl = '/Special:AllPages';
 
     while (nextPageUrl !== '') {
@@ -85,6 +85,9 @@ async function scrapeMediaWiki(url: string, filter?: RegExp): Promise<Page[]> {
             }
         }
 
+        // Clean up navigation DOM immediately
+        dom.window.close();
+
         const payload = new URLSearchParams();
         payload.append('catname', '');
         payload.append('pages', listOfPages.join('\n'));
@@ -101,7 +104,10 @@ async function scrapeMediaWiki(url: string, filter?: RegExp): Promise<Page[]> {
         });
 
         const data = await response.text();
-        rawXml.push(data);
+
+        // Process XML immediately to free up memory
+        const chunkPages = getPagesFromXml(data);
+        accumulatedPages.push(...chunkPages);
 
         if (nextPage) {
             const nav = nextPage.querySelectorAll('a');
@@ -122,13 +128,13 @@ async function scrapeMediaWiki(url: string, filter?: RegExp): Promise<Page[]> {
         }
     }
 
-    return rawXml.flatMap(xml => getPagesFromXml(xml));
+    return accumulatedPages;
 }
 
 async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
     const baseUrl = `https://${fandom}.fandom.com/`;
     let nextPageUrl = '/wiki/Special:AllPages';
-    const rawXml = [];
+    const accumulatedPages: Page[] = [];
 
     while (nextPageUrl !== '') {
         const currentUrl = new URL(nextPageUrl, baseUrl);
@@ -153,6 +159,9 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
             }
         }
 
+        // Clean up navigation DOM immediately
+        dom.window.close();
+
         const payload = new URLSearchParams();
         payload.append('catname', '');
         payload.append('pages', listOfPages.join('\n'));
@@ -169,7 +178,10 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
         });
 
         const data = await response.text();
-        rawXml.push(data);
+
+        // Process XML immediately to free up memory
+        const chunkPages = getPagesFromXml(data);
+        accumulatedPages.push(...chunkPages);
 
         if (nextPage) {
             const nav = nextPage.querySelectorAll('a');
@@ -190,7 +202,7 @@ async function scrapeFandom(fandom: string, filter?: RegExp): Promise<Page[]> {
         }
     }
 
-    return rawXml.flatMap(xml => getPagesFromXml(xml));
+    return accumulatedPages;
 }
 
 function wikiToText(wiki: string): string {
@@ -243,6 +255,9 @@ function getPagesFromXml(xml: string): Page[] {
             result.push({ title: titleText, content: contentText });
         }
     }
+
+    // Explicitly close the JSDOM window to release memory
+    dom.window.close();
 
     return result;
 }
